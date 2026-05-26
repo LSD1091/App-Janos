@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeBase — Tu hogar organizado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: #E2DDD5;
+    --border2: #D0C9BF;
+    --text: #1A1714;
+    --text2: #6B6460;
+    --text3: #9E9890;
+    --accent: #2D6A4F;
+    --accent-light: #D8F0E6;
+    --accent-text: #1B4332;
+    --danger: #C0392B;
+    --danger-light: #FDECEA;
+    --warning: #D4880A;
+    --warning-light: #FEF3DC;
+    --info: #1A5276;
+    --info-light: #D6EAF8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --nav-h: 64px;
+    --sidebar-w: 240px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    padding: 2rem;
+  }
+
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .auth-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+  }
+
+  .auth-logo h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .auth-logo span {
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 300;
+    display: block;
+    margin-top: -2px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1.5rem;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-family: var(--font);
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text2);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .auth-tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { background: #245c43; }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover { background: var(--surface2); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border-color: transparent;
+  }
+
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+  .btn-full { width: 100%; }
+
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+  /* ── APP LAYOUT ── */
+  #app-screen { display: none; min-height: 100vh; }
+
+  .topbar {
+    height: var(--nav-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    gap: 12px;
+  }
+
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    min-width: 160px;
+  }
+
+  .topbar-logo-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 15px;
+  }
+
+  .topbar-home-name {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+    padding: 4px 10px;
+    background: var(--surface2);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  .avatar-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent-text);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    font-family: var(--font);
+  }
+
+  .main-layout {
+    display: flex;
+    margin-top: var(--nav-h);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    height: calc(100vh - var(--nav-h));
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    overflow-y: auto;
+    padding: 1rem 0;
+    z-index: 90;
+  }
+
+  .sidebar-section {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sidebar-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 0.5rem;
+    margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.12s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font);
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--accent-text);
+  }
+
+  .nav-item .nav-icon { font-size: 18px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-family: var(--mono);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 2rem;
+    min-height: calc(100vh - var(--nav-h));
+    max-width: 900px;
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+  }
+
+  /* ── STAT CARDS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .stat-value.positive { color: var(--accent); }
+  .stat-value.negative { color: var(--danger); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: var(--bg); }
+
+  /* ── BADGE / PILL ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .badge-success { background: var(--accent-light); color: var(--accent-text); }
+  .badge-danger { background: var(--danger-light); color: var(--danger); }
+  .badge-warning { background: var(--warning-light); color: var(--warning); }
+  .badge-info { background: var(--info-light); color: var(--info); }
+  .badge-neutral { background: var(--surface2); color: var(--text2); }
+
+  /* ── AMOUNT ── */
+  .amount-positive { color: var(--accent); font-weight: 600; font-family: var(--mono); }
+  .amount-negative { color: var(--danger); font-weight: 600; font-family: var(--mono); }
+  .amount-neutral { font-family: var(--mono); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(2px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.18s ease;
+  }
+
+  @keyframes modalIn {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-size: 17px; font-weight: 600; }
+
+  .modal-body { padding: 1.5rem; }
+
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* ── DIVISION TOGGLE ── */
+  .div-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .div-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text2);
+    font-family: var(--font);
+    transition: all 0.12s;
+  }
+
+  .div-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── PARTICIPANT ROWS ── */
+  .participant-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .participant-row:last-child { border-bottom: none; }
+
+  .participant-check { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  .participant-name { flex: 1; font-size: 14px; }
+
+  .participant-amount {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+    width: 80px;
+    text-align: right;
+  }
+
+  .participant-input {
+    width: 80px;
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 14px;
+    text-align: right;
+    outline: none;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .participant-input:focus { border-color: var(--accent); }
+
+  /* ── BALANCE ITEMS ── */
+  .balance-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .balance-item:last-child { border-bottom: none; }
+
+  .balance-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .balance-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent-text);
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .balance-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* ── CATEGORY ICONS ── */
+  .cat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── INFO SECTION (Casa) ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.12s;
+    box-shadow: var(--shadow);
+  }
+
+  .info-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .info-card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .info-card-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .info-card-sub { font-size: 13px; color: var(--text2); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text2);
+  }
+
+  .empty-state-icon {
+    font-size: 40px;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+  }
+
+  .empty-state h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .empty-state p { font-size: 14px; margin-bottom: 1.5rem; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.12s;
+  }
+
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.25s ease;
+    white-space: nowrap;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SETUP SCREEN ── */
+  #setup-screen {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    padding: 2rem;
+  }
+
+  /* ── TASKS ── */
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    transition: all 0.12s;
+  }
+
+  .task-item.done { opacity: 0.5; }
+  .task-item.done .task-title { text-decoration: line-through; }
+
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+  }
+
+  .task-check.done { background: var(--accent); border-color: var(--accent); color: white; font-size: 12px; }
+  .task-title { flex: 1; font-size: 14px; font-weight: 500; }
+  .task-meta { font-size: 12px; color: var(--text3); }
+
+  /* ── SHOPPING ── */
+  .shop-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+  }
+
+  .shop-check {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .shop-name { flex: 1; font-size: 14px; }
+  .shop-qty { font-size: 13px; color: var(--text2); font-family: var(--mono); }
+
+  /* ── CONFIG ── */
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .member-item:last-child { border-bottom: none; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+
+  /* ── INLINE FORM ── */
+  .inline-form {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .inline-form .form-group { flex: 1; margin-bottom: 0; }
+
+  /* ── NOTIFICATION DOT ── */
+  .notif-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 700px) {
+    :root { --sidebar-w: 0px; }
+
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+    .sidebar.open { transform: translateX(0); width: 240px; }
+
+    .main-content { margin-left: 0; padding: 1rem; }
+
+    .mobile-menu-btn { display: flex !important; }
+
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text2);
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .mt-1 { margin-top: 4px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 1rem; }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 12px; }
+  .text-muted { color: var(--text2); }
+  .fw-600 { font-weight: 600; }
+  .w-full { width: 100%; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ AUTH SCREEN ══════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏠</div>
+      <div>
+        <h1>HomeBase</h1>
+        <span>Tu hogar, organizado</span>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Registrarse</button>
+    </div>
+
+    <div id="login-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()" id="login-btn">Entrar</button>
+      <p style="text-align:center;font-size:13px;color:var(--text2);margin-top:12px;">
+        ¿No tienes cuenta? <a href="#" onclick="switchAuthTab('register');return false;" style="color:var(--accent);font-weight:500;">Regístrate</a>
+      </p>
+    </div>
+
+    <div id="register-form" style="display:none;">
+      <div class="form-group">
+        <label>Tu nombre</label>
+        <input type="text" id="reg-name" placeholder="Carlos">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleRegister()" id="register-btn">Crear cuenta</button>
+    </div>
+
+    <div id="auth-error" style="display:none;margin-top:12px;padding:10px 14px;background:var(--danger-light);color:var(--danger);border-radius:8px;font-size:13px;"></div>
+  </div>
+</div>
+
+<!-- ══════════ SETUP SCREEN ══════════ -->
+<div id="setup-screen">
+  <div class="auth-card" style="max-width:460px;">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏠</div>
+      <div>
+        <h1>Configura tu hogar</h1>
+        <span>Antes de empezar, crea o únete a un hogar</span>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchSetupTab('create')">Crear hogar</button>
+      <button class="auth-tab" onclick="switchSetupTab('join')">Unirse</button>
+    </div>
+
+    <div id="create-home-form">
+      <div class="form-group">
+        <label>Nombre del hogar</label>
+        <input type="text" id="home-name" placeholder="Ej: Piso Goya, Casa Familia...">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleCreateHome()">Crear hogar →</button>
+    </div>
+
+    <div id="join-home-form" style="display:none;">
+      <div class="form-group">
+        <label>Código de invitación</label>
+        <input type="text" id="invite-code" placeholder="XXXX-XXXX" style="font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleJoinHome()">Unirme →</button>
+    </div>
+
+    <div id="setup-error" style="display:none;margin-top:12px;padding:10px 14px;background:var(--danger-light);color:var(--danger);border-radius:8px;font-size:13px;"></div>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app-screen">
+
+  <!-- Topbar -->
+  <nav class="topbar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon">🏠</div>
+      HomeBase
+    </div>
+    <span class="topbar-home-name" id="topbar-home-name">Mi hogar</span>
+    <div class="topbar-spacer"></div>
+    <div class="avatar-btn" id="user-avatar" onclick="showView('config')" title="Configuración">?</div>
+  </nav>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Principal</div>
+        <button class="nav-item active" data-view="dashboard" onclick="showView('dashboard')">
+          <span class="nav-icon">🏠</span> Inicio
+        </button>
+        <button class="nav-item" data-view="gastos" onclick="showView('gastos')">
+          <span class="nav-icon">💸</span> Gastos
+        </button>
+        <button class="nav-item" data-view="balance" onclick="showView('balance')">
+          <span class="nav-icon">⚖️</span> Balance
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Hogar</div>
+        <button class="nav-item" data-view="casa" onclick="showView('casa')">
+          <span class="nav-icon">🏡</span> Mi Casa
+        </button>
+        <button class="nav-item" data-view="tareas" onclick="showView('tareas')">
+          <span class="nav-icon">✅</span> Tareas
+        </button>
+        <button class="nav-item" data-view="compras" onclick="showView('compras')">
+          <span class="nav-icon">🛒</span> Compras
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Cuenta</div>
+        <button class="nav-item" data-view="config" onclick="showView('config')">
+          <span class="nav-icon">⚙️</span> Configuración
+        </button>
+        <button class="nav-item" onclick="handleLogout()">
+          <span class="nav-icon">🚪</span> Cerrar sesión
+        </button>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="main-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="view active" id="view-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="dash-greeting">Bienvenido 👋</div>
+            <div class="page-subtitle" id="dash-date"></div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-gasto')">+ Añadir gasto</button>
+        </div>
+
+        <div class="stats-grid" id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-label">Tu balance</div>
+            <div class="stat-value" id="stat-balance">—</div>
+            <div class="stat-sub" id="stat-balance-sub">Cargando...</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Gastos este mes</div>
+            <div class="stat-value" id="stat-monthly">—</div>
+            <div class="stat-sub">Total del hogar</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tareas pendientes</div>
+            <div class="stat-value" id="stat-tasks">—</div>
+            <div class="stat-sub">Sin completar</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Miembros</div>
+            <div class="stat-value" id="stat-members">—</div>
+            <div class="stat-sub">En el hogar</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="card">
+            <div class="card-title">Actividad reciente</div>
+            <div id="dash-recent"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Gastos pendientes de liquidar</div>
+            <div id="dash-debts"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GASTOS ── -->
+      <div class="view" id="view-gastos">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Gastos</div>
+            <div class="page-subtitle">Historial del hogar</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-gasto')">+ Nuevo gasto</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-gastos-lista')">Lista</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-gastos-cats')">Por categoría</button>
+        </div>
+
+        <div id="tab-gastos-lista" class="tab-content active">
+          <div class="table-wrap" id="gastos-table">
+            <div class="loading"><div class="spinner"></div> Cargando gastos...</div>
+          </div>
+        </div>
+
+        <div id="tab-gastos-cats" class="tab-content">
+          <div id="gastos-cats-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- ── BALANCE ── -->
+      <div class="view" id="view-balance">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Balance</div>
+            <div class="page-subtitle">Quién debe qué</div>
+          </div>
+          <button class="btn btn-secondary" onclick="openModal('modal-pago')">Registrar pago</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-balance-deudas')">Deudas</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-balance-pagos')">Pagos</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-balance-simplificado')">Simplificado</button>
+        </div>
+
+        <div id="tab-balance-deudas" class="tab-content active">
+          <div id="balance-deudas-view"><div class="loading"><div class="spinner"></div> Calculando...</div></div>
+        </div>
+
+        <div id="tab-balance-pagos" class="tab-content">
+          <div id="balance-pagos-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+
+        <div id="tab-balance-simplificado" class="tab-content">
+          <div id="balance-simplificado-view"><div class="loading"><div class="spinner"></div> Calculando...</div></div>
+        </div>
+      </div>
+
+      <!-- ── MI CASA ── -->
+      <div class="view" id="view-casa">
+        <div class="page-header">
+          <div class="page-title">Mi Casa</div>
+          <button class="btn btn-primary" onclick="openModal('modal-info')">+ Añadir info</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-casa-todo')">Todo</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-casa-suministros')">Suministros</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-casa-contratos')">Contratos</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-casa-contactos')">Contactos</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-casa-otros')">Otros</button>
+        </div>
+
+        <div id="tab-casa-todo" class="tab-content active">
+          <div id="casa-todo-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+        <div id="tab-casa-suministros" class="tab-content">
+          <div id="casa-suministros-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+        <div id="tab-casa-contratos" class="tab-content">
+          <div id="casa-contratos-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+        <div id="tab-casa-contactos" class="tab-content">
+          <div id="casa-contactos-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+        <div id="tab-casa-otros" class="tab-content">
+          <div id="casa-otros-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- ── TAREAS ── -->
+      <div class="view" id="view-tareas">
+        <div class="page-header">
+          <div class="page-title">Tareas</div>
+          <button class="btn btn-primary" onclick="openModal('modal-tarea')">+ Nueva tarea</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-tareas-pendientes')">Pendientes</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-tareas-completadas')">Completadas</button>
+        </div>
+
+        <div id="tab-tareas-pendientes" class="tab-content active">
+          <div id="tareas-pendientes-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+        <div id="tab-tareas-completadas" class="tab-content">
+          <div id="tareas-completadas-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- ── COMPRAS ── -->
+      <div class="view" id="view-compras">
+        <div class="page-header">
+          <div class="page-title">Lista de la compra</div>
+          <button class="btn btn-primary" onclick="openModal('modal-compra')">+ Añadir item</button>
+        </div>
+
+        <div id="compras-view"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
+
+        <div style="margin-top:1rem;display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="marcarTodoComprado()">✓ Marcar todo comprado</button>
+          <button class="btn btn-secondary btn-sm" onclick="limpiarComprados()">🗑 Limpiar comprados</button>
+        </div>
+      </div>
+
+      <!-- ── CONFIG ── -->
+      <div class="view" id="view-config">
+        <div class="page-title" style="margin-bottom:1.5rem;">Configuración</div>
+
+        <div class="card mb-4">
+          <div class="card-title">Tu perfil</div>
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="config-name" placeholder="Tu nombre">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="updateProfile()">Guardar cambios</button>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-title">Miembros del hogar</div>
+          <div id="config-members"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-title">Código de invitación</div>
+          <p class="text-sm text-muted mb-3">Comparte este código para que otros se unan a tu hogar</p>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <code id="invite-code-display" style="font-family:var(--mono);font-size:18px;letter-spacing:3px;font-weight:600;padding:8px 16px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">—</code>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteCode()">📋 Copiar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Supabase — Conexión</div>
+          <p class="text-sm text-muted mb-3">Configura tu proyecto de Supabase aquí</p>
+          <div class="form-group">
+            <label>Supabase URL</label>
+            <input type="text" id="config-sb-url" placeholder="https://xxxx.supabase.co">
+          </div>
+          <div class="form-group">
+            <label>Anon Key</label>
+            <input type="password" id="config-sb-key" placeholder="eyJhbGci...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveSupabaseConfig()">Guardar y reconectar</button>
+          <p class="text-xs text-muted mt-2">Los datos se guardan en tu navegador (localStorage)</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Modal: Nuevo Gasto -->
+<div class="modal-overlay" id="modal-gasto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-gasto-title">Nuevo gasto</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-gasto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="gasto-edit-id">
+      <div class="grid-2">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Descripción</label>
+          <input type="text" id="gasto-titulo" placeholder="Ej: Compra supermercado">
+        </div>
+        <div class="form-group">
+          <label>Importe (€)</label>
+          <input type="number" id="gasto-importe" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="gasto-fecha">
+        </div>
+        <div class="form-group">
+          <label>Pagado por</label>
+          <select id="gasto-pagador"></select>
+        </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="gasto-categoria">
+            <option value="alimentacion">🛒 Alimentación</option>
+            <option value="hogar">🏠 Hogar</option>
+            <option value="suministros">⚡ Suministros</option>
+            <option value="transporte">🚗 Transporte</option>
+            <option value="ocio">🎉 Ocio</option>
+            <option value="salud">💊 Salud</option>
+            <option value="restaurantes">🍽️ Restaurantes</option>
+            <option value="otros">📦 Otros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notas (opcional)</label>
+        <input type="text" id="gasto-nota" placeholder="Ej: Ticket del Mercadona">
+      </div>
+
+      <div style="margin-top:1rem;">
+        <label style="font-size:13px;font-weight:500;color:var(--text2);display:block;margin-bottom:8px;">División entre participantes</label>
+        <div class="div-toggle">
+          <button class="div-btn active" id="div-igual" onclick="setDivision('igual')">A partes iguales</button>
+          <button class="div-btn" id="div-porcentaje" onclick="setDivision('porcentaje')">Por %</button>
+          <button class="div-btn" id="div-personalizado" onclick="setDivision('personalizado')">Personalizado</button>
+        </div>
+
+        <div id="participants-container"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-gasto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveGasto()" id="save-gasto-btn">Guardar gasto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Registrar Pago -->
+<div class="modal-overlay" id="modal-pago">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Registrar pago</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-pago')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Pagado por</label>
+          <select id="pago-de"></select>
+        </div>
+        <div class="form-group">
+          <label>Pagado a</label>
+          <select id="pago-a"></select>
+        </div>
+        <div class="form-group">
+          <label>Importe (€)</label>
+          <input type="number" id="pago-importe" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="pago-fecha">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nota (opcional)</label>
+        <input type="text" id="pago-nota" placeholder="Ej: Bizum del 15 de enero">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-pago')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePago()">Registrar pago</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Info Casa -->
+<div class="modal-overlay" id="modal-info">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-info-title">Añadir información</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-info')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="info-edit-id">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="info-tipo" onchange="renderInfoFields()">
+          <option value="suministro">⚡ Suministro (luz, agua, gas...)</option>
+          <option value="contrato">📄 Contrato / Póliza</option>
+          <option value="contacto">📞 Contacto importante</option>
+          <option value="wifi">📶 WiFi</option>
+          <option value="vehiculo">🚗 Vehículo</option>
+          <option value="documento">📁 Documento / Nota</option>
+        </select>
+      </div>
+      <div id="info-dynamic-fields"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-info')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveInfo()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tarea -->
+<div class="modal-overlay" id="modal-tarea">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva tarea</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-tarea')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tarea</label>
+        <input type="text" id="tarea-titulo" placeholder="Ej: Fregar los platos">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Asignada a</label>
+          <select id="tarea-asignado">
+            <option value="">Nadie (rotación)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha límite</label>
+          <input type="date" id="tarea-fecha">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Recurrencia</label>
+        <select id="tarea-recurrencia">
+          <option value="none">Sin recurrencia</option>
+          <option value="daily">Diaria</option>
+          <option value="weekly">Semanal</option>
+          <option value="monthly">Mensual</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-tarea')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTarea()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Compra -->
+<div class="modal-overlay" id="modal-compra">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Añadir a la compra</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-compra')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Producto</label>
+        <input type="text" id="compra-nombre" placeholder="Ej: Leche, pan, tomates...">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" id="compra-cantidad" placeholder="1" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>Unidad</label>
+          <select id="compra-unidad">
+            <option value="ud">Unidades</option>
+            <option value="kg">kg</option>
+            <option value="g">gramos</option>
+            <option value="l">litros</option>
+            <option value="ml">ml</option>
+            <option value="paquete">Paquete</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-compra')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCompra()">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ver info Casa (detalle) -->
+<div class="modal-overlay" id="modal-info-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-detail-title">Detalle</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-info-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" id="detail-edit-btn">✏️ Editar</button>
+      <button class="btn btn-danger btn-sm" id="detail-delete-btn">🗑 Eliminar</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-info-detail')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ══════════ JAVASCRIPT ══════════ -->
+<script>
+// ─────────────────────────────────────────────
+// ESTADO GLOBAL
+// ─────────────────────────────────────────────
+let supabase_client = null;
+let currentUser = null;
+let currentHome = null;
+let homeMembers = [];
+let currentDivision = 'igual';
+
+const CATS = {
+  alimentacion: '🛒', hogar: '🏠', suministros: '⚡',
+  transporte: '🚗', ocio: '🎉', salud: '💊',
+  restaurantes: '🍽️', otros: '📦'
+};
+
+const INFO_TYPES = {
+  suministro: '⚡', contrato: '📄', contacto: '📞',
+  wifi: '📶', vehiculo: '🚗', documento: '📁'
+};
+
+// ─────────────────────────────────────────────
+// SUPABASE INIT
+// ─────────────────────────────────────────────
+function initSupabase() {
+  const url = localStorage.getItem('sb_url');
+  const key = localStorage.getItem('sb_key');
+  if (!url || !key) return false;
+  try {
+    supabase_client = supabase.createClient(url, key);
+    return true;
+  } catch(e) {
+    console.error('Supabase init error:', e);
+    return false;
+  }
+}
+
+async function checkSession() {
+  if (!supabase_client) {
+    // Sin configurar — ir a config
+    showConfigFirst();
+    return;
+  }
+  const { data: { session } } = await supabase_client.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadUserHome();
+  } else {
+    showScreen('auth-screen');
+  }
+}
+
+function showConfigFirst() {
+  // Mostrar app con config abierta para que configure Supabase
+  showScreen('app-screen');
+  showView('config');
+  toast('Configura tu Supabase para empezar ⚙️', 4000);
+}
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((b,i) => b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+async function handleLogin() {
+  if (!supabase_client) { showAuthError('Primero configura Supabase en la sección de Configuración'); return; }
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  if (!email || !pass) { showAuthError('Rellena todos los campos'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  const { data, error } = await supabase_client.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Entrar'; btn.disabled = false;
+  if (error) { showAuthError(error.message); return; }
+  currentUser = data.user;
+  await loadUserHome();
+}
+
+async function handleRegister() {
+  if (!supabase_client) { showAuthError('Primero configura Supabase'); return; }
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  if (!name || !email || !pass) { showAuthError('Rellena todos los campos'); return; }
+  if (pass.length < 6) { showAuthError('La contraseña debe tener al menos 6 caracteres'); return; }
+  const btn = document.getElementById('register-btn');
+  btn.textContent = 'Creando...'; btn.disabled = true;
+  const { data, error } = await supabase_client.auth.signUp({
+    email, password: pass,
+    options: { data: { full_name: name } }
+  });
+  btn.textContent = 'Crear cuenta'; btn.disabled = false;
+  if (error) { showAuthError(error.message); return; }
+  currentUser = data.user;
+  // Crear perfil
+  await supabase_client.from('profiles').upsert({ id: currentUser.id, name });
+  await loadUserHome();
+}
+
+async function handleLogout() {
+  if (supabase_client) await supabase_client.auth.signOut();
+  currentUser = null; currentHome = null; homeMembers = [];
+  showScreen('auth-screen');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// HOME SETUP
+// ─────────────────────────────────────────────
+async function loadUserHome() {
+  if (!supabase_client) return;
+  // Buscar si el usuario ya pertenece a un hogar
+  const { data: membership } = await supabase_client
+    .from('home_members')
+    .select('home_id, homes(*)')
+    .eq('user_id', currentUser.id)
+    .eq('active', true)
+    .single();
+
+  if (membership?.homes) {
+    currentHome = membership.homes;
+    await loadApp();
+  } else {
+    showScreen('setup-screen');
+  }
+}
+
+function switchSetupTab(tab) {
+  document.querySelectorAll('#setup-screen .auth-tab').forEach((b,i) => b.classList.toggle('active', (tab==='create'&&i===0)||(tab==='join'&&i===1)));
+  document.getElementById('create-home-form').style.display = tab === 'create' ? 'block' : 'none';
+  document.getElementById('join-home-form').style.display = tab === 'join' ? 'block' : 'none';
+}
+
+async function handleCreateHome() {
+  const name = document.getElementById('home-name').value.trim();
+  if (!name) { showSetupError('Pon un nombre al hogar'); return; }
+  const code = generateCode();
+  const { data: home, error } = await supabase_client
+    .from('homes').insert({ name, invite_code: code, created_by: currentUser.id }).select().single();
+  if (error) { showSetupError(error.message); return; }
+  await supabase_client.from('home_members').insert({ home_id: home.id, user_id: currentUser.id, role: 'admin', active: true });
+  // Upsert profile with name if not set
+  const userName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+  await supabase_client.from('profiles').upsert({ id: currentUser.id, name: userName });
+  currentHome = home;
+  await loadApp();
+}
+
+async function handleJoinHome() {
+  const code = document.getElementById('invite-code').value.trim().toUpperCase();
+  if (!code) { showSetupError('Introduce el código de invitación'); return; }
+  const { data: home } = await supabase_client.from('homes').select().eq('invite_code', code).single();
+  if (!home) { showSetupError('Código incorrecto o no encontrado'); return; }
+  await supabase_client.from('home_members').upsert({ home_id: home.id, user_id: currentUser.id, role: 'member', active: true });
+  const userName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+  await supabase_client.from('profiles').upsert({ id: currentUser.id, name: userName });
+  currentHome = home;
+  await loadApp();
+}
+
+function showSetupError(msg) {
+  const el = document.getElementById('setup-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// APP PRINCIPAL
+// ─────────────────────────────────────────────
+async function loadApp() {
+  showScreen('app-screen');
+  // Cargar miembros del hogar
+  await loadMembers();
+  updateTopbar();
+  showView('dashboard');
+}
+
+async function loadMembers() {
+  const { data } = await supabase_client
+    .from('home_members')
+    .select('user_id, role, active, profiles(id, name)')
+    .eq('home_id', currentHome.id)
+    .eq('active', true);
+  homeMembers = (data || []).map(m => ({
+    id: m.user_id,
+    name: m.profiles?.name || 'Usuario',
+    role: m.role
+  }));
+}
+
+function updateTopbar() {
+  document.getElementById('topbar-home-name').textContent = currentHome.name;
+  const me = homeMembers.find(m => m.id === currentUser?.id);
+  const avatar = document.getElementById('user-avatar');
+  if (me) {
+    avatar.textContent = me.name.slice(0,2).toUpperCase();
+    avatar.title = me.name;
+  }
+  // Fecha en dashboard
+  const now = new Date();
+  document.getElementById('dash-date').textContent = now.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const me2 = homeMembers.find(m => m.id === currentUser?.id);
+  document.getElementById('dash-greeting').textContent = `Hola, ${me2?.name || 'tú'} 👋`;
+}
+
+// ─────────────────────────────────────────────
+// NAVEGACIÓN
+// ─────────────────────────────────────────────
+function showView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item[data-view]').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('view-' + view);
+  if (el) el.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-view="${view}"]`);
+  if (nav) nav.classList.add('active');
+  // Load data for view
+  switch(view) {
+    case 'dashboard': loadDashboard(); break;
+    case 'gastos': loadGastos(); break;
+    case 'balance': loadBalance(); break;
+    case 'casa': loadCasa(); break;
+    case 'tareas': loadTareas(); break;
+    case 'compras': loadCompras(); break;
+    case 'config': loadConfig(); break;
+  }
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function showScreen(id) {
+  ['auth-screen','setup-screen','app-screen'].forEach(s => {
+    const el = document.getElementById(s);
+    if (s === 'app-screen') el.style.display = id === s ? 'block' : 'none';
+    else el.style.display = id === s ? 'flex' : 'none';
+  });
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function switchTab(btn, contentId) {
+  const parent = btn.closest('.view') || btn.closest('.modal');
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+async function loadDashboard() {
+  if (!supabase_client || !currentHome) return;
+  // Balance del usuario actual
+  const balances = await calcularBalances();
+  const me = balances[currentUser.id] || 0;
+  const statBal = document.getElementById('stat-balance');
+  const statBalSub = document.getElementById('stat-balance-sub');
+  statBal.textContent = Math.abs(me).toFixed(2) + '€';
+  statBal.className = 'stat-value ' + (me > 0 ? 'positive' : me < 0 ? 'negative' : '');
+  statBalSub.textContent = me > 0 ? 'Te deben' : me < 0 ? 'Debes' : 'Estás al día ✓';
+
+  // Gastos mes actual
+  const now = new Date();
+  const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const { data: gastosMonth } = await supabase_client
+    .from('gastos').select('importe_total')
+    .eq('home_id', currentHome.id).eq('deleted', false)
+    .gte('fecha', startMonth);
+  const totalMonth = (gastosMonth || []).reduce((s,g) => s + parseFloat(g.importe_total), 0);
+  document.getElementById('stat-monthly').textContent = totalMonth.toFixed(2) + '€';
+
+  // Tareas pendientes
+  const { count: tareasPend } = await supabase_client
+    .from('tareas').select('id', { count: 'exact', head: true })
+    .eq('home_id', currentHome.id).eq('estado', 'pendiente');
+  document.getElementById('stat-tasks').textContent = tareasPend || 0;
+
+  // Miembros
+  document.getElementById('stat-members').textContent = homeMembers.length;
+
+  // Actividad reciente
+  const { data: recent } = await supabase_client
+    .from('gastos').select('titulo, importe_total, fecha, pagador_id, categoria')
+    .eq('home_id', currentHome.id).eq('deleted', false)
+    .order('created_at', { ascending: false }).limit(5);
+
+  const recentEl = document.getElementById('dash-recent');
+  if (!recent?.length) {
+    recentEl.innerHTML = '<div class="empty-state" style="padding:1.5rem"><div class="empty-state-icon">📭</div><p>Sin actividad aún</p></div>';
+  } else {
+    recentEl.innerHTML = recent.map(g => {
+      const who = homeMembers.find(m => m.id === g.pagador_id)?.name || '?';
+      const cat = CATS[g.categoria] || '📦';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div class="cat-icon" style="background:var(--surface2)">${cat}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g.titulo}</div>
+          <div style="font-size:12px;color:var(--text2);">${who} · ${formatDate(g.fecha)}</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:14px;font-weight:600;">${parseFloat(g.importe_total).toFixed(2)}€</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Deudas del usuario actual
+  const debtEl = document.getElementById('dash-debts');
+  const deudas = await calcularDeudas();
+  const misDeudas = deudas.filter(d => d.deudor === currentUser.id || d.acreedor === currentUser.id);
+  if (!misDeudas.length) {
+    debtEl.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--accent);font-weight:500;">✓ Sin deudas pendientes</div>';
+  } else {
+    debtEl.innerHTML = misDeudas.slice(0,4).map(d => {
+      const other = d.deudor === currentUser.id ?
+        homeMembers.find(m => m.id === d.acreedor)?.name : homeMembers.find(m => m.id === d.deudor)?.name;
+      const esDudor = d.deudor === currentUser.id;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:14px;">${esDudor ? `Debes a <b>${other}</b>` : `<b>${other}</b> te debe`}</div>
+        <span class="${esDudor ? 'amount-negative' : 'amount-positive'}">${d.importe.toFixed(2)}€</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ─────────────────────────────────────────────
+// GASTOS
+// ─────────────────────────────────────────────
+async function loadGastos() {
+  if (!supabase_client || !currentHome) return;
+  const { data: gastos } = await supabase_client
+    .from('gastos').select('*, gasto_participantes(*)')
+    .eq('home_id', currentHome.id).eq('deleted', false)
+    .order('fecha', { ascending: false });
+
+  renderGastosTabla(gastos || []);
+  renderGastosCats(gastos || []);
+}
+
+function renderGastosTabla(gastos) {
+  const el = document.getElementById('gastos-table');
+  if (!gastos.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💸</div><h3>Sin gastos aún</h3><p>Añade el primer gasto del hogar</p><button class="btn btn-primary" onclick="openModal('modal-gasto')">+ Añadir gasto</button></div>`;
+    return;
+  }
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>Descripción</th><th>Importe</th><th>Pagado por</th><th>Fecha</th><th>División</th><th></th>
+    </tr></thead>
+    <tbody>${gastos.map(g => {
+      const who = homeMembers.find(m => m.id === g.pagador_id)?.name || '?';
+      const cat = CATS[g.categoria] || '📦';
+      const parts = g.gasto_participantes?.length || 0;
+      return `<tr>
+        <td><span class="cat-icon" style="display:inline-flex;margin-right:8px;background:var(--surface2)">${cat}</span>${g.titulo}</td>
+        <td><span class="amount-neutral">${parseFloat(g.importe_total).toFixed(2)}€</span></td>
+        <td><span class="badge badge-neutral">${who}</span></td>
+        <td><span class="text-muted text-sm">${formatDate(g.fecha)}</span></td>
+        <td><span class="tag">${g.tipo_division === 'igual' ? '÷ igual' : g.tipo_division === 'porcentaje' ? '÷ %' : '÷ custom'} · ${parts}p</span></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-ghost btn-sm" onclick="editGasto('${g.id}')">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteGasto('${g.id}')">🗑</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function renderGastosCats(gastos) {
+  const bycat = {};
+  gastos.forEach(g => {
+    const c = g.categoria || 'otros';
+    if (!bycat[c]) bycat[c] = { total: 0, count: 0 };
+    bycat[c].total += parseFloat(g.importe_total);
+    bycat[c].count++;
+  });
+  const total = gastos.reduce((s,g) => s + parseFloat(g.importe_total), 0);
+  const el = document.getElementById('gastos-cats-view');
+  if (!Object.keys(bycat).length) {
+    el.innerHTML = '<div class="empty-state"><p>Sin datos aún</p></div>'; return;
+  }
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+    ${Object.entries(bycat).sort((a,b)=>b[1].total-a[1].total).map(([cat, data]) => {
+      const pct = total > 0 ? (data.total/total*100).toFixed(1) : 0;
+      return `<div class="card">
+        <div style="font-size:24px;margin-bottom:8px;">${CATS[cat] || '📦'}</div>
+        <div style="font-size:15px;font-weight:600;text-transform:capitalize;margin-bottom:4px;">${cat}</div>
+        <div style="font-family:var(--mono);font-size:22px;font-weight:600;margin-bottom:4px;">${data.total.toFixed(2)}€</div>
+        <div style="font-size:12px;color:var(--text2);">${data.count} gasto${data.count!==1?'s':''} · ${pct}% del total</div>
+        <div style="margin-top:10px;height:4px;background:var(--surface2);border-radius:2px;">
+          <div style="height:4px;background:var(--accent);border-radius:2px;width:${pct}%;transition:width 0.5s;"></div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────
+// CÁLCULO DE BALANCES Y DEUDAS
+// ─────────────────────────────────────────────
+async function calcularBalances() {
+  // Para cada miembro: cuánto pagó - cuánto le correspondía gastado + cuánto pagó a otros - cuánto le pagaron
+  const { data: gastos } = await supabase_client
+    .from('gastos').select('*, gasto_participantes(*)')
+    .eq('home_id', currentHome.id).eq('deleted', false);
+
+  const { data: pagos } = await supabase_client
+    .from('pagos').select('*')
+    .eq('home_id', currentHome.id);
+
+  const balances = {};
+  homeMembers.forEach(m => balances[m.id] = 0);
+
+  (gastos || []).forEach(g => {
+    const pagador = g.pagador_id;
+    const total = parseFloat(g.importe_total);
+    // Pagador suma lo que pagó
+    if (balances[pagador] !== undefined) balances[pagador] += total;
+    // Cada participante resta lo que le corresponde
+    (g.gasto_participantes || []).forEach(p => {
+      if (balances[p.usuario_id] !== undefined) {
+        balances[p.usuario_id] -= parseFloat(p.importe_asignado);
+      }
+    });
+  });
+
+  // Pagos directos entre personas
+  (pagos || []).forEach(p => {
+    if (balances[p.pagador_id] !== undefined) balances[p.pagador_id] += parseFloat(p.importe);
+    if (balances[p.receptor_id] !== undefined) balances[p.receptor_id] -= parseFloat(p.importe);
+  });
+
+  return balances;
+}
+
+async function calcularDeudas() {
+  // Algoritmo de simplificación: net balance por persona → transferencias mínimas
+  const balances = await calcularBalances();
+  const deudores = [], acreedores = [];
+
+  Object.entries(balances).forEach(([uid, bal]) => {
+    if (bal < -0.01) deudores.push({ id: uid, amt: Math.abs(bal) });
+    else if (bal > 0.01) acreedores.push({ id: uid, amt: bal });
+  });
+
+  const deudas = [];
+  let i = 0, j = 0;
+  while (i < deudores.length && j < acreedores.length) {
+    const d = deudores[i], a = acreedores[j];
+    const amount = Math.min(d.amt, a.amt);
+    deudas.push({ deudor: d.id, acreedor: a.id, importe: Math.round(amount * 100) / 100 });
+    d.amt -= amount; a.amt -= amount;
+    if (d.amt < 0.01) i++;
+    if (a.amt < 0.01) j++;
+  }
+  return deudas;
+}
+
+// ─────────────────────────────────────────────
+// BALANCE VIEW
+// ─────────────────────────────────────────────
+async function loadBalance() {
+  if (!supabase_client || !currentHome) return;
+  loadBalanceDeudas();
+  loadBalancePagos();
+}
+
+async function loadBalanceDeudas() {
+  const deudas = await calcularDeudas();
+  const el = document.getElementById('balance-deudas-view');
+  const simEl = document.getElementById('balance-simplificado-view');
+
+  if (!deudas.length) {
+    const msg = '<div style="padding:2rem;text-align:center;color:var(--accent);font-size:16px;font-weight:500;">🎉 ¡Todo el hogar está al día!</div>';
+    el.innerHTML = msg; simEl.innerHTML = msg; return;
+  }
+
+  const rows = deudas.map(d => {
+    const deudor = homeMembers.find(m => m.id === d.deudor)?.name || '?';
+    const acreedor = homeMembers.find(m => m.id === d.acreedor)?.name || '?';
+    const isMe = d.deudor === currentUser.id;
+    return `<div class="balance-item">
+      <div class="balance-person">
+        <div class="balance-avatar">${deudor.slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:14px;font-weight:500;">${deudor} <span style="color:var(--text2);font-weight:400;">→</span> ${acreedor}</div>
+          <div class="text-sm text-muted">${isMe ? 'Tú debes' : ''}</div>
+        </div>
+      </div>
+      <div class="balance-actions">
+        <span class="amount-negative">${d.importe.toFixed(2)}€</span>
+        ${isMe ? `<button class="btn btn-primary btn-sm" onclick="prefillPago('${d.acreedor}','${d.importe}')">Pagar</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="card">${rows}</div>`;
+  simEl.innerHTML = `<div class="card">
+    <p class="text-sm text-muted mb-3">Mínimas transferencias necesarias para liquidar todas las deudas:</p>
+    ${rows}
+  </div>`;
+}
+
+async function loadBalancePagos() {
+  const { data: pagos } = await supabase_client
+    .from('pagos').select('*').eq('home_id', currentHome.id)
+    .order('fecha', { ascending: false });
+
+  const el = document.getElementById('balance-pagos-view');
+  if (!pagos?.length) {
+    el.innerHTML = '<div class="empty-state"><p>Sin pagos registrados aún</p></div>'; return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>De</th><th>A</th><th>Importe</th><th>Fecha</th><th>Nota</th></tr></thead>
+    <tbody>${pagos.map(p => {
+      const de = homeMembers.find(m => m.id === p.pagador_id)?.name || '?';
+      const a = homeMembers.find(m => m.id === p.receptor_id)?.name || '?';
+      return `<tr>
+        <td><span class="badge badge-neutral">${de}</span></td>
+        <td><span class="badge badge-success">${a}</span></td>
+        <td><span class="amount-neutral fw-600">${parseFloat(p.importe).toFixed(2)}€</span></td>
+        <td class="text-muted text-sm">${formatDate(p.fecha)}</td>
+        <td class="text-sm text-muted">${p.nota || '—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function prefillPago(receptorId, importe) {
+  openModal('modal-pago');
+  setTimeout(() => {
+    const sel = document.getElementById('pago-a');
+    for (let o of sel.options) if (o.value === receptorId) o.selected = true;
+    document.getElementById('pago-importe').value = parseFloat(importe).toFixed(2);
+  }, 100);
+}
+
+// ─────────────────────────────────────────────
+// MODAL GASTO — ABRIR/GUARDAR
+// ─────────────────────────────────────────────
+function openModal(id) {
+  const overlay = document.getElementById(id);
+  overlay.classList.add('open');
+  if (id === 'modal-gasto') initGastoModal();
+  if (id === 'modal-pago') initPagoModal();
+  if (id === 'modal-tarea') initTareaModal();
+  if (id === 'modal-info') renderInfoFields();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+function initGastoModal(editData = null) {
+  document.getElementById('gasto-edit-id').value = '';
+  document.getElementById('gasto-titulo').value = '';
+  document.getElementById('gasto-importe').value = '';
+  document.getElementById('gasto-fecha').value = todayISO();
+  document.getElementById('gasto-nota').value = '';
+  document.getElementById('modal-gasto-title').textContent = 'Nuevo gasto';
+  document.getElementById('save-gasto-btn').textContent = 'Guardar gasto';
+  setDivision('igual');
+
+  const pagSel = document.getElementById('gasto-pagador');
+  pagSel.innerHTML = homeMembers.map(m => `<option value="${m.id}"${m.id===currentUser.id?' selected':''}>${m.name}</option>`).join('');
+
+  renderParticipants();
+
+  if (editData) {
+    document.getElementById('gasto-edit-id').value = editData.id;
+    document.getElementById('gasto-titulo').value = editData.titulo;
+    document.getElementById('gasto-importe').value = editData.importe_total;
+    document.getElementById('gasto-fecha').value = editData.fecha;
+    document.getElementById('gasto-nota').value = editData.nota || '';
+    document.getElementById('modal-gasto-title').textContent = 'Editar gasto';
+    document.getElementById('save-gasto-btn').textContent = 'Actualizar';
+    document.getElementById('gasto-categoria').value = editData.categoria || 'otros';
+    for (let o of pagSel.options) if (o.value === editData.pagador_id) o.selected = true;
+    setDivision(editData.tipo_division || 'igual');
+
+    // Marcar participantes y sus importes
+    if (editData.gasto_participantes) {
+      editData.gasto_participantes.forEach(p => {
+        const cb = document.querySelector(`input[data-uid="${p.usuario_id}"]`);
+        if (cb) {
+          cb.checked = true;
+          const inp = cb.closest('.participant-row')?.querySelector('.participant-input');
+          if (inp) inp.value = parseFloat(p.importe_asignado).toFixed(2);
+        }
+      });
+      updateEqualSplit();
+    }
+  }
+}
+
+function initPagoModal() {
+  const today = todayISO();
+  document.getElementById('pago-fecha').value = today;
+  document.getElementById('pago-importe').value = '';
+  document.getElementById('pago-nota').value = '';
+  const deOpts = homeMembers.map(m => `<option value="${m.id}"${m.id===currentUser.id?' selected':''}>${m.name}</option>`).join('');
+  const aOpts = homeMembers.filter(m=>m.id!==currentUser.id).map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('pago-de').innerHTML = deOpts;
+  document.getElementById('pago-a').innerHTML = aOpts;
+}
+
+function initTareaModal() {
+  document.getElementById('tarea-titulo').value = '';
+  document.getElementById('tarea-fecha').value = '';
+  document.getElementById('tarea-recurrencia').value = 'none';
+  const sel = document.getElementById('tarea-asignado');
+  sel.innerHTML = `<option value="">Nadie (rotación)</option>` + homeMembers.map(m => `<option value="${m.id}"${m.id===currentUser.id?' selected':''}>${m.name}</option>`).join('');
+}
+
+function setDivision(type) {
+  currentDivision = type;
+  ['igual','porcentaje','personalizado'].forEach(t => {
+    document.getElementById('div-'+t).classList.toggle('active', t===type);
+  });
+  renderParticipants();
+}
+
+function renderParticipants() {
+  const container = document.getElementById('participants-container');
+  const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
+  const n = homeMembers.length;
+  const perPerson = n > 0 ? (importe / n) : 0;
+
+  container.innerHTML = homeMembers.map((m, idx) => {
+    const checked = 'checked';
+    let rightSide = '';
+    if (currentDivision === 'igual') {
+      rightSide = `<span class="participant-amount">${perPerson.toFixed(2)}€</span>`;
+    } else if (currentDivision === 'porcentaje') {
+      const pct = n > 0 ? (100/n).toFixed(1) : 0;
+      rightSide = `<input class="participant-input" type="number" min="0" max="100" step="0.1" value="${pct}" onchange="updatePctSplit()" data-pct="${m.id}"> <span style="font-size:13px;color:var(--text2);">%</span>`;
+    } else {
+      rightSide = `<input class="participant-input" type="number" min="0" step="0.01" value="${perPerson.toFixed(2)}" data-custom="${m.id}">`;
+    }
+    return `<div class="participant-row">
+      <input type="checkbox" class="participant-check" ${checked} data-uid="${m.id}" onchange="updateEqualSplit()">
+      <span class="participant-name">${m.name}</span>
+      ${rightSide}
+    </div>`;
+  }).join('');
+
+  document.getElementById('gasto-importe').oninput = () => updateEqualSplit();
+}
+
+function updateEqualSplit() {
+  if (currentDivision !== 'igual') return;
+  const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
+  const checked = document.querySelectorAll('.participant-check:checked');
+  const perPerson = checked.length > 0 ? (importe / checked.length) : 0;
+  document.querySelectorAll('.participant-amount').forEach(el => {
+    el.textContent = perPerson.toFixed(2) + '€';
+  });
+}
+
+function updatePctSplit() {
+  // Auto-adjust to 100% by distributing remainder
+}
+
+async function saveGasto() {
+  const editId = document.getElementById('gasto-edit-id').value;
+  const titulo = document.getElementById('gasto-titulo').value.trim();
+  const importe = parseFloat(document.getElementById('gasto-importe').value);
+  const fecha = document.getElementById('gasto-fecha').value;
+  const pagador = document.getElementById('gasto-pagador').value;
+  const categoria = document.getElementById('gasto-categoria').value;
+  const nota = document.getElementById('gasto-nota').value.trim();
+
+  if (!titulo) { toast('Añade una descripción'); return; }
+  if (!importe || importe <= 0) { toast('El importe debe ser mayor que 0'); return; }
+
+  // Recoger participantes
+  const participantes = [];
+  document.querySelectorAll('.participant-check:checked').forEach(cb => {
+    const uid = cb.dataset.uid;
+    let imp = 0;
+    if (currentDivision === 'igual') {
+      const checkedAll = document.querySelectorAll('.participant-check:checked').length;
+      imp = importe / checkedAll;
+    } else if (currentDivision === 'porcentaje') {
+      const pctInput = document.querySelector(`input[data-pct="${uid}"]`);
+      imp = pctInput ? (parseFloat(pctInput.value) / 100) * importe : 0;
+    } else {
+      const customInput = document.querySelector(`input[data-custom="${uid}"]`);
+      imp = customInput ? parseFloat(customInput.value) : 0;
+    }
+    participantes.push({ usuario_id: uid, importe_asignado: Math.round(imp * 100) / 100 });
+  });
+
+  if (!participantes.length) { toast('Selecciona al menos un participante'); return; }
+
+  const btn = document.getElementById('save-gasto-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  try {
+    if (editId) {
+      await supabase_client.from('gastos').update({
+        titulo, importe_total: importe, fecha, pagador_id: pagador,
+        categoria, nota, tipo_division: currentDivision
+      }).eq('id', editId);
+      await supabase_client.from('gasto_participantes').delete().eq('gasto_id', editId);
+      await supabase_client.from('gasto_participantes').insert(
+        participantes.map(p => ({ ...p, gasto_id: editId }))
+      );
+      toast('Gasto actualizado ✓');
+    } else {
+      const { data: gasto } = await supabase_client.from('gastos').insert({
+        titulo, importe_total: importe, fecha, pagador_id: pagador,
+        categoria, nota, tipo_division: currentDivision,
+        home_id: currentHome.id, deleted: false
+      }).select().single();
+      await supabase_client.from('gasto_participantes').insert(
+        participantes.map(p => ({ ...p, gasto_id: gasto.id }))
+      );
+      toast('Gasto añadido ✓');
+    }
+    closeModal('modal-gasto');
+    loadGastos();
+    loadDashboard();
+  } catch(e) {
+    toast('Error al guardar: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = editId ? 'Actualizar' : 'Guardar gasto';
+}
+
+async function editGasto(id) {
+  const { data } = await supabase_client.from('gastos').select('*, gasto_participantes(*)').eq('id', id).single();
+  openModal('modal-gasto');
+  setTimeout(() => initGastoModal(data), 50);
+}
+
+async function deleteGasto(id) {
+  if (!confirm('¿Eliminar este gasto? Los datos quedarán en el historial.')) return;
+  await supabase_client.from('gastos').update({ deleted: true }).eq('id', id);
+  toast('Gasto eliminado');
+  loadGastos(); loadDashboard();
+}
+
+async function savePago() {
+  const de = document.getElementById('pago-de').value;
+  const a = document.getElementById('pago-a').value;
+  const importe = parseFloat(document.getElementById('pago-importe').value);
+  const fecha = document.getElementById('pago-fecha').value;
+  const nota = document.getElementById('pago-nota').value.trim();
+
+  if (!importe || importe <= 0) { toast('Importe inválido'); return; }
+  if (de === a) { toast('El pagador y receptor no pueden ser el mismo'); return; }
+
+  await supabase_client.from('pagos').insert({
+    pagador_id: de, receptor_id: a, importe, fecha,
+    nota, home_id: currentHome.id
+  });
+
+  toast('Pago registrado ✓');
+  closeModal('modal-pago');
+  loadBalance(); loadDashboard();
+}
+
+// ─────────────────────────────────────────────
+// MI CASA
+// ─────────────────────────────────────────────
+const INFO_FIELDS = {
+  suministro: [
+    { id:'titulo', label:'Nombre del suministro', placeholder:'Ej: Iberdrola Luz' },
+    { id:'compania', label:'Compañía', placeholder:'Ej: Endesa' },
+    { id:'referencia', label:'Nº de contrato / referencia', placeholder:'ES-12345' },
+    { id:'titular', label:'Titular', placeholder:'Nombre completo' },
+    { id:'vencimiento', label:'Fecha de vencimiento', type:'date' },
+    { id:'importe', label:'Cuota mensual (€)', placeholder:'80.00' },
+    { id:'notas', label:'Notas', placeholder:'...', multiline:true }
+  ],
+  contrato: [
+    { id:'titulo', label:'Nombre del contrato/póliza', placeholder:'Ej: Seguro hogar' },
+    { id:'compania', label:'Compañía / Aseguradora', placeholder:'Mapfre' },
+    { id:'numero', label:'Nº póliza / referencia', placeholder:'POL-123456' },
+    { id:'titular', label:'Titular', placeholder:'Nombre completo' },
+    { id:'vencimiento', label:'Fecha de vencimiento', type:'date' },
+    { id:'importe', label:'Prima / cuota (€)', placeholder:'350.00' },
+    { id:'notas', label:'Notas', placeholder:'...', multiline:true }
+  ],
+  contacto: [
+    { id:'titulo', label:'Nombre / descripción', placeholder:'Ej: Administrador finca' },
+    { id:'nombre', label:'Nombre completo', placeholder:'Juan García' },
+    { id:'telefono', label:'Teléfono', placeholder:'+34 600 000 000' },
+    { id:'email', label:'Email', placeholder:'info@ejemplo.com' },
+    { id:'notas', label:'Notas', placeholder:'...', multiline:true }
+  ],
+  wifi: [
+    { id:'titulo', label:'Nombre de la red (SSID)', placeholder:'MiCasa_5G' },
+    { id:'password', label:'Contraseña', placeholder:'••••••••' },
+    { id:'router', label:'Modelo de router', placeholder:'Xiaomi AX3000' },
+    { id:'proveedor', label:'Proveedor de internet', placeholder:'Vodafone' },
+    { id:'velocidad', label:'Velocidad contratada', placeholder:'600 Mbps' }
+  ],
+  vehiculo: [
+    { id:'titulo', label:'Descripción', placeholder:'Ej: Ford Focus azul' },
+    { id:'matricula', label:'Matrícula', placeholder:'0000 AAA' },
+    { id:'marca', label:'Marca y modelo', placeholder:'Ford Focus 1.0 EcoBoost' },
+    { id:'propietario', label:'Propietario', placeholder:'Nombre completo' },
+    { id:'seguro_compania', label:'Compañía seguro', placeholder:'Mutua Madrileña' },
+    { id:'seguro_vencimiento', label:'Vencimiento seguro', type:'date' },
+    { id:'itv_vencimiento', label:'Vencimiento ITV', type:'date' },
+    { id:'notas', label:'Notas', placeholder:'...', multiline:true }
+  ],
+  documento: [
+    { id:'titulo', label:'Título del documento', placeholder:'Ej: Contrato de alquiler' },
+    { id:'descripcion', label:'Descripción', placeholder:'Breve descripción...', multiline:true },
+    { id:'url', label:'Enlace (opcional)', placeholder:'https://...' }
+  ]
+};
+
+function renderInfoFields() {
+  const tipo = document.getElementById('info-tipo').value;
+  const fields = INFO_FIELDS[tipo] || [];
+  const container = document.getElementById('info-dynamic-fields');
+  container.innerHTML = fields.map(f => `
+    <div class="form-group">
+      <label>${f.label}</label>
+      ${f.multiline
+        ? `<textarea id="info-f-${f.id}" placeholder="${f.placeholder || ''}" rows="2" style="resize:vertical;"></textarea>`
+        : `<input type="${f.type || 'text'}" id="info-f-${f.id}" placeholder="${f.placeholder || ''}">`
+      }
+    </div>`).join('');
+}
+
+async function saveInfo() {
+  const tipo = document.getElementById('info-tipo').value;
+  const editId = document.getElementById('info-edit-id').value;
+  const fields = INFO_FIELDS[tipo] || [];
+  const datos = {};
+  let titulo = '';
+  fields.forEach(f => {
+    const el = document.getElementById('info-f-' + f.id);
+    if (el) {
+      datos[f.id] = el.value;
+      if (f.id === 'titulo') titulo = el.value;
+    }
+  });
+  if (!titulo) { toast('El título es obligatorio'); return; }
+
+  const payload = { tipo, titulo, datos_json: datos, home_id: currentHome.id };
+  if (editId) {
+    await supabase_client.from('info_casa').update(payload).eq('id', editId);
+    toast('Actualizado ✓');
+  } else {
+    await supabase_client.from('info_casa').insert(payload);
+    toast('Guardado ✓');
+  }
+  closeModal('modal-info');
+  loadCasa();
+}
+
+async function loadCasa() {
+  if (!supabase_client || !currentHome) return;
+  const { data } = await supabase_client.from('info_casa')
+    .select('*').eq('home_id', currentHome.id).order('created_at');
+
+  const all = data || [];
+  renderCasaSection('casa-todo-view', all);
+  ['suministros','contratos','contactos'].forEach(t => {
+    const type = t === 'suministros' ? 'suministro' : t === 'contratos' ? 'contrato' : 'contacto';
+    renderCasaSection('casa-'+t+'-view', all.filter(i => i.tipo === type));
+  });
+  renderCasaSection('casa-otros-view', all.filter(i => ['wifi','vehiculo','documento'].includes(i.tipo)));
+}
+
+function renderCasaSection(elId, items) {
+  const el = document.getElementById(elId);
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏡</div><h3>Sin información aún</h3><p>Añade datos importantes de tu hogar</p><button class="btn btn-primary btn-sm" onclick="openModal('modal-info')">+ Añadir</button></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="info-grid">${items.map(item => `
+    <div class="info-card" onclick="showInfoDetail('${item.id}')">
+      <span class="info-card-icon">${INFO_TYPES[item.tipo] || '📁'}</span>
+      <div class="info-card-title">${item.titulo}</div>
+      <div class="info-card-sub">${item.tipo}</div>
+      ${item.datos_json?.vencimiento ? `<div class="text-xs text-muted mt-1">Vence: ${formatDate(item.datos_json.vencimiento)}</div>` : ''}
+    </div>`).join('')}
+  </div>`;
+}
+
+async function showInfoDetail(id) {
+  const { data: item } = await supabase_client.from('info_casa').select().eq('id', id).single();
+  if (!item) return;
+  document.getElementById('modal-detail-title').textContent = item.titulo;
+  const fields = INFO_FIELDS[item.tipo] || [];
+  const datos = item.datos_json || {};
+  document.getElementById('modal-detail-body').innerHTML = `
+    <div style="margin-bottom:12px;"><span class="badge badge-info">${INFO_TYPES[item.tipo]} ${item.tipo}</span></div>
+    ${fields.filter(f => f.id !== 'titulo').map(f => datos[f.id] ? `
+      <div class="form-group">
+        <label>${f.label}</label>
+        <div style="font-size:14px;padding:8px;background:var(--surface2);border-radius:6px;font-family:${f.id==='password'?'var(--mono)':'inherit'};">${datos[f.id]}</div>
+      </div>` : '').join('')}
+  `;
+  document.getElementById('detail-edit-btn').onclick = () => { closeModal('modal-info-detail'); editInfo(item); };
+  document.getElementById('detail-delete-btn').onclick = () => deleteInfo(id);
+  openModal('modal-info-detail');
+}
+
+function editInfo(item) {
+  openModal('modal-info');
+  setTimeout(() => {
+    document.getElementById('info-edit-id').value = item.id;
+    document.getElementById('info-tipo').value = item.tipo;
+    renderInfoFields();
+    const datos = item.datos_json || {};
+    const fields = INFO_FIELDS[item.tipo] || [];
+    fields.forEach(f => {
+      const el = document.getElementById('info-f-' + f.id);
+      if (el && datos[f.id]) el.value = datos[f.id];
+    });
+    document.getElementById('modal-info-title').textContent = 'Editar información';
+  }, 50);
+}
+
+async function deleteInfo(id) {
+  if (!confirm('¿Eliminar este elemento?')) return;
+  await supabase_client.from('info_casa').delete().eq('id', id);
+  toast('Eliminado ✓');
+  closeModal('modal-info-detail');
+  loadCasa();
+}
+
+// ─────────────────────────────────────────────
+// TAREAS
+// ─────────────────────────────────────────────
+async function loadTareas() {
+  if (!supabase_client || !currentHome) return;
+  const { data } = await supabase_client.from('tareas').select('*')
+    .eq('home_id', currentHome.id).order('created_at', { ascending: false });
+  const all = data || [];
+  renderTareas('tareas-pendientes-view', all.filter(t => t.estado === 'pendiente'));
+  renderTareas('tareas-completadas-view', all.filter(t => t.estado === 'completada'));
+}
+
+function renderTareas(elId, tareas) {
+  const el = document.getElementById(elId);
+  if (!tareas.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>Sin tareas aquí</p></div>'; return;
+  }
+  el.innerHTML = tareas.map(t => {
+    const asig = t.asignado_a ? homeMembers.find(m => m.id === t.asignado_a)?.name : 'Sin asignar';
+    const done = t.estado === 'completada';
+    return `<div class="task-item ${done?'done':''}">
+      <div class="task-check ${done?'done':''}" onclick="toggleTarea('${t.id}','${t.estado}')">
+        ${done ? '✓' : ''}
+      </div>
+      <div style="flex:1">
+        <div class="task-title">${t.titulo}</div>
+        <div class="task-meta">${asig}${t.fecha_limite ? ' · ' + formatDate(t.fecha_limite) : ''}${t.recurrencia!=='none'?' · 🔄 '+t.recurrencia:''}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="deleteTarea('${t.id}')">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+async function saveTarea() {
+  const titulo = document.getElementById('tarea-titulo').value.trim();
+  if (!titulo) { toast('Añade un título'); return; }
+  await supabase_client.from('tareas').insert({
+    titulo,
+    asignado_a: document.getElementById('tarea-asignado').value || null,
+    fecha_limite: document.getElementById('tarea-fecha').value || null,
+    recurrencia: document.getElementById('tarea-recurrencia').value,
+    estado: 'pendiente', home_id: currentHome.id
+  });
+  toast('Tarea añadida ✓'); closeModal('modal-tarea'); loadTareas();
+}
+
+async function toggleTarea(id, estado) {
+  const nuevo = estado === 'pendiente' ? 'completada' : 'pendiente';
+  await supabase_client.from('tareas').update({ estado: nuevo }).eq('id', id);
+  loadTareas(); loadDashboard();
+}
+
+async function deleteTarea(id) {
+  await supabase_client.from('tareas').delete().eq('id', id);
+  toast('Tarea eliminada'); loadTareas();
+}
+
+// ─────────────────────────────────────────────
+// COMPRAS
+// ─────────────────────────────────────────────
+async function loadCompras() {
+  if (!supabase_client || !currentHome) return;
+  const { data } = await supabase_client.from('lista_compra')
+    .select('*').eq('home_id', currentHome.id).order('created_at');
+  renderCompras(data || []);
+}
+
+function renderCompras(items) {
+  const el = document.getElementById('compras-view');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛒</div><h3>La lista está vacía</h3><p>Añade lo que necesites comprar</p></div>'; return;
+  }
+  const pendientes = items.filter(i => !i.comprado);
+  const comprados = items.filter(i => i.comprado);
+  el.innerHTML = `
+    ${pendientes.length ? `<div style="margin-bottom:1rem;">
+      ${pendientes.map(i => renderShopItem(i)).join('')}
+    </div>` : ''}
+    ${comprados.length ? `
+      <div class="text-sm text-muted mb-2" style="padding:8px 0 4px;">Comprados (${comprados.length})</div>
+      ${comprados.map(i => renderShopItem(i)).join('')}` : ''}
+  `;
+}
+
+function renderShopItem(item) {
+  return `<div class="shop-item" style="${item.comprado?'opacity:0.5;':''}">
+    <input type="checkbox" class="shop-check" ${item.comprado?'checked':''} onchange="toggleCompra('${item.id}',${item.comprado})">
+    <span class="shop-name" style="${item.comprado?'text-decoration:line-through;':''}">${item.nombre}</span>
+    <span class="shop-qty">${item.cantidad} ${item.unidad}</span>
+    <button class="btn btn-ghost btn-sm" onclick="deleteCompra('${item.id}')">✕</button>
+  </div>`;
+}
+
+async function saveCompra() {
+  const nombre = document.getElementById('compra-nombre').value.trim();
+  if (!nombre) { toast('Añade un producto'); return; }
+  await supabase_client.from('lista_compra').insert({
+    nombre, cantidad: document.getElementById('compra-cantidad').value,
+    unidad: document.getElementById('compra-unidad').value,
+    comprado: false, home_id: currentHome.id, añadido_por: currentUser.id
+  });
+  toast('Añadido ✓'); closeModal('modal-compra'); loadCompras();
+}
+
+async function toggleCompra(id, wasComprado) {
+  await supabase_client.from('lista_compra').update({ comprado: !wasComprado }).eq('id', id);
+  loadCompras();
+}
+
+async function deleteCompra(id) {
+  await supabase_client.from('lista_compra').delete().eq('id', id);
+  loadCompras();
+}
+
+async function marcarTodoComprado() {
+  await supabase_client.from('lista_compra').update({ comprado: true }).eq('home_id', currentHome.id).eq('comprado', false);
+  loadCompras();
+}
+
+async function limpiarComprados() {
+  await supabase_client.from('lista_compra').delete().eq('home_id', currentHome.id).eq('comprado', true);
+  toast('Lista limpiada ✓'); loadCompras();
+}
+
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+async function loadConfig() {
+  if (currentHome) {
+    document.getElementById('invite-code-display').textContent = currentHome.invite_code || '—';
+  }
+  const me = homeMembers.find(m => m.id === currentUser?.id);
+  if (me) document.getElementById('config-name').value = me.name;
+
+  document.getElementById('config-sb-url').value = localStorage.getItem('sb_url') || '';
+  document.getElementById('config-sb-key').value = localStorage.getItem('sb_key') || '';
+
+  const membersEl = document.getElementById('config-members');
+  if (!homeMembers.length) { membersEl.innerHTML = '<p class="text-sm text-muted">Sin miembros cargados</p>'; return; }
+  membersEl.innerHTML = homeMembers.map(m => `
+    <div class="member-item">
+      <div class="balance-avatar">${m.name.slice(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:500;">${m.name}</div>
+        <div class="text-sm text-muted">${m.role}</div>
+      </div>
+      ${m.id === currentUser?.id ? '<span class="badge badge-info">Tú</span>' : ''}
+    </div>`).join('');
+}
+
+async function updateProfile() {
+  const name = document.getElementById('config-name').value.trim();
+  if (!name) { toast('Introduce tu nombre'); return; }
+  await supabase_client.from('profiles').upsert({ id: currentUser.id, name });
+  await loadMembers();
+  updateTopbar();
+  toast('Perfil actualizado ✓');
+}
+
+function copyInviteCode() {
+  const code = currentHome?.invite_code || '';
+  navigator.clipboard.writeText(code).then(() => toast('Código copiado ✓'));
+}
+
+function saveSupabaseConfig() {
+  const url = document.getElementById('config-sb-url').value.trim();
+  const key = document.getElementById('config-sb-key').value.trim();
+  if (!url || !key) { toast('Rellena URL y Key'); return; }
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  supabase_client = supabase.createClient(url, key);
+  toast('Configuración guardada. Recargando...');
+  setTimeout(() => location.reload(), 1200);
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function todayISO() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00'));
+  return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) code += '-';
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+let toastTimeout;
+function toast(msg, duration = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Mostrar auth por defecto
+  showScreen('auth-screen');
+  // Intentar init supabase desde localStorage
+  const hasConfig = initSupabase();
+  if (hasConfig) {
+    checkSession();
+  } else {
+    // Mostrar auth de todas formas; config se hace en settings
+    showScreen('auth-screen');
+  }
+});
+</script>
+</body>
+</html>
